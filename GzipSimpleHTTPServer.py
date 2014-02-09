@@ -42,7 +42,6 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def do_GET(self):
         """Serve a GET request."""
-        print "Serving a GET request."
         f = self.send_head()
         if f:
             self.copyfile(f, self.wfile)
@@ -65,9 +64,8 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         None, in which case the caller has nothing further to do.
 
         """
-        print "Requested path '%s'" % self.path
         path = self.translate_path(self.path)
-        print "Translated path '%s'" % path
+        print "Serving path '%s'" % path
         f = None
         if os.path.isdir(path):
             if not self.path.endswith('/'):
@@ -179,8 +177,7 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         to copy binary data as well.
 
         """
-        if hasattr(source, 'name'):
-          outputfile = gzip.GzipFile(filename=('%s.gz'%source.name), mode='wb', fileobj=outputfile)
+        outputfile = gzip.GzipFile(mode='wb', fileobj=outputfile)
         shutil.copyfileobj(source, outputfile)
 
     def guess_type(self, path):
