@@ -22,6 +22,7 @@ try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
+import gzip
 
 
 class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -41,6 +42,7 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def do_GET(self):
         """Serve a GET request."""
+        print "Serving a GET request."
         f = self.send_head()
         if f:
             self.copyfile(f, self.wfile)
@@ -63,7 +65,9 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         None, in which case the caller has nothing further to do.
 
         """
+        print "Requested path '%s'" % self.path
         path = self.translate_path(self.path)
+        print "Translated path '%s'" % path
         f = None
         if os.path.isdir(path):
             if not self.path.endswith('/'):
@@ -90,6 +94,7 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return None
         self.send_response(200)
         self.send_header("Content-type", ctype)
+        self.send_header("Content-Encoding", "gzip")
         fs = os.fstat(f.fileno())
         self.send_header("Content-Length", str(fs[6]))
         self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
@@ -112,7 +117,7 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         list.sort(key=lambda a: a.lower())
         f = StringIO()
         displaypath = cgi.escape(urllib.unquote(self.path))
-        f.write('<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">')
+        f.write('<!DOCTYPE html>')
         f.write("<html>\n<title>Directory listing for %s</title>\n" % displaypath)
         f.write("<body>\n<h2>Directory listing for %s</h2>\n" % displaypath)
         f.write("<hr>\n<ul>\n")
@@ -174,6 +179,8 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         to copy binary data as well.
 
         """
+        if hasattr(source, 'name'):
+          outputfile = gzip.GzipFile(filename=('%s.gz'%source.name), mode='wb', fileobj=outputfile)
         shutil.copyfileobj(source, outputfile)
 
     def guess_type(self, path):
