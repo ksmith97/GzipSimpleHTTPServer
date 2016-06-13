@@ -17,6 +17,7 @@ import urllib
 import cgi
 import sys
 import mimetypes
+import zlib
 try:
     from cStringIO import StringIO
 except ImportError:
