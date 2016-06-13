@@ -27,7 +27,6 @@ except ImportError:
 
 SERVER_PORT = 1337
 
-class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 try:
     parser = OptionParser()
     parser.add_option("-e", "--encoding", dest="encoding_type",
@@ -69,6 +68,8 @@ def gzip_encode(content):
     data = gzip_compress.compress(content) + gzip_compress.flush()
     return data
 
+
+class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Simple HTTP request handler with GET and HEAD commands.
 
     This serves files from the current directory and any of its
@@ -131,10 +132,19 @@ def gzip_encode(content):
             return None
         self.send_response(200)
         self.send_header("Content-type", ctype)
-        self.send_header("Content-Encoding", "gzip")
+        self.send_header("Content-Encoding", encoding_type)
         fs = os.fstat(f.fileno())
         raw_content_length = fs[6]
-        content = f.read();
+        content = f.read()
+
+        # Encode content based on runtime arg
+        if encoding_type == "gzip":
+            content = gzip_encode(content)
+        elif encoding_type == "deflate":
+            content = deflate_encode(content)
+        elif encoding_type == "zlib":
+            content = zlib_encode(content)
+
         compressed_content_length = len(content)
         f.close()
         self.send_header("Content-Length", max(raw_content_length, compressed_content_length))
