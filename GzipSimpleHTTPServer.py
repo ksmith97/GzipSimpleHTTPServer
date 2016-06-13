@@ -22,14 +22,7 @@ try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
-import gzip
 
-def gzipencode(content):
-    out = StringIO()
-    f = gzip.GzipFile(fileobj=out, mode='w', compresslevel=5)
-    f.write(content)
-    f.close()
-    return out.getvalue()
 
 class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
@@ -99,7 +92,6 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         fs = os.fstat(f.fileno())
         raw_content_length = fs[6]
         content = f.read();
-        content = gzipencode(content)
         compressed_content_length = len(content)
         f.close()
         self.send_header("Content-Length", max(raw_content_length, compressed_content_length))
