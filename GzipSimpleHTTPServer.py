@@ -51,6 +51,22 @@ except:
     sys.exit()
 
 
+def zlib_encode(content):
+    zlib_compress = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS)
+    data = zlib_compress.compress(content) + zlib_compress.flush()
+    return data
+
+
+def deflate_encode(content):
+    deflate_compress = zlib.compressobj(9, zlib.DEFLATED, -zlib.MAX_WBITS)
+    data = deflate_compress.compress(content) + deflate_compress.flush()
+    return data
+
+
+def gzip_encode(content):
+    gzip_compress = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS | 16)
+    data = gzip_compress.compress(content) + gzip_compress.flush()
+    return data
 
     """Simple HTTP request handler with GET and HEAD commands.
 
