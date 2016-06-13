@@ -16,7 +16,6 @@ import BaseHTTPServer
 import urllib
 import cgi
 import sys
-import shutil
 import mimetypes
 try:
     from cStringIO import StringIO
