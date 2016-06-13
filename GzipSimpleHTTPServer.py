@@ -25,6 +25,7 @@ try:
 except ImportError:
     from StringIO import StringIO
 
+SERVER_PORT = 1337
 
 class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 try:
