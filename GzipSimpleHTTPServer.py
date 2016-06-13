@@ -18,6 +18,8 @@ import cgi
 import sys
 import mimetypes
 import zlib
+from optparse import OptionParser
+
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -25,6 +27,30 @@ except ImportError:
 
 
 class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+try:
+    parser = OptionParser()
+    parser.add_option("-e", "--encoding", dest="encoding_type",
+                      help="Encoding type for server to utilize",
+                      metavar="ENCODING")
+    (options, args) = parser.parse_args()
+    encoding_type = options.encoding_type
+
+    # Re-Add port for BaseHTTPServer to use since providing an encoding arg
+    # overrode this functionality
+    sys.argv[1] = SERVER_PORT
+
+    if encoding_type not in ['zlib', 'deflate', 'gzip']:
+        raise Exception
+
+except:
+    sys.stderr.write(
+        "Please provide an encoding_type for the server to utilize.\n")
+    sys.stderr.write("Possible values are 'zlib', 'gzip', and 'deflate'\n")
+    sys.stderr.write("Usage: python GzipSimpleHTTPServer.py "
+                     "--encoding=<encoding_type>\n")
+    sys.exit()
+
+
 
     """Simple HTTP request handler with GET and HEAD commands.
 
