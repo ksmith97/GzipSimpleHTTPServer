@@ -25,7 +25,7 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-SERVER_PORT = 1337
+SERVER_PORT = 8000
 
 try:
     parser = OptionParser()
