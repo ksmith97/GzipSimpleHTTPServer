@@ -16,23 +16,60 @@ import BaseHTTPServer
 import urllib
 import cgi
 import sys
-import shutil
 import mimetypes
+import zlib
+from optparse import OptionParser
+
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
-import gzip
 
-def gzipencode(content):
-    out = StringIO()
-    f = gzip.GzipFile(fileobj=out, mode='w', compresslevel=5)
-    f.write(content)
-    f.close()
-    return out.getvalue()
+SERVER_PORT = 8000
+
+try:
+    parser = OptionParser()
+    parser.add_option("-e", "--encoding", dest="encoding_type",
+                      help="Encoding type for server to utilize",
+                      metavar="ENCODING")
+    (options, args) = parser.parse_args()
+    encoding_type = options.encoding_type
+
+    # Re-Add port for BaseHTTPServer to use since providing an encoding arg
+    # overrode this functionality
+    sys.argv[1] = SERVER_PORT
+
+    if encoding_type not in ['zlib', 'deflate', 'gzip']:
+        raise Exception
+
+except:
+    sys.stderr.write(
+        "Please provide an encoding_type for the server to utilize.\n")
+    sys.stderr.write("Possible values are 'zlib', 'gzip', and 'deflate'\n")
+    sys.stderr.write("Usage: python GzipSimpleHTTPServer.py "
+                     "--encoding=<encoding_type>\n")
+    sys.exit()
+
+
+def zlib_encode(content):
+    zlib_compress = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS)
+    data = zlib_compress.compress(content) + zlib_compress.flush()
+    return data
+
+
+def deflate_encode(content):
+    deflate_compress = zlib.compressobj(9, zlib.DEFLATED, -zlib.MAX_WBITS)
+    data = deflate_compress.compress(content) + deflate_compress.flush()
+    return data
+
+
+def gzip_encode(content):
+    gzip_compress = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS | 16)
+    data = gzip_compress.compress(content) + gzip_compress.flush()
+    return data
+
 
 class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-
     """Simple HTTP request handler with GET and HEAD commands.
 
     This serves files from the current directory and any of its
@@ -95,11 +132,19 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return None
         self.send_response(200)
         self.send_header("Content-type", ctype)
-        self.send_header("Content-Encoding", "gzip")
+        self.send_header("Content-Encoding", encoding_type)
         fs = os.fstat(f.fileno())
         raw_content_length = fs[6]
-        content = f.read();
-        content = gzipencode(content)
+        content = f.read()
+
+        # Encode content based on runtime arg
+        if encoding_type == "gzip":
+            content = gzip_encode(content)
+        elif encoding_type == "deflate":
+            content = deflate_encode(content)
+        elif encoding_type == "zlib":
+            content = zlib_encode(content)
+
         compressed_content_length = len(content)
         f.close()
         self.send_header("Content-Length", max(raw_content_length, compressed_content_length))
