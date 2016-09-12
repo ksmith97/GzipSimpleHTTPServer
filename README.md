@@ -18,3 +18,13 @@ This will start a localhost server on port 8000. You should see this in your ter
 ````
 Serving HTTP on 0.0.0.0 port 8000 ...
 ````
+
+To run on a different port use:
+````
+python GzipSimpleHTTPServer.py --port=8080
+````
+
+For more options run:
+````
+python GzipSimpleHTTPServer.py --help
+````
