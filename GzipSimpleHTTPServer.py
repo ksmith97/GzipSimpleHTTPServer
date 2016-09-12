@@ -32,12 +32,16 @@ try:
     parser.add_option("-e", "--encoding", dest="encoding_type",
                       help="Encoding type for server to utilize",
                       metavar="ENCODING")
+    parser.add_option("-p", "--port", dest="port", default=SERVER_PORT,
+                      help="The port to serve the files on",
+                      metavar="ENCODING")
     (options, args) = parser.parse_args()
     encoding_type = options.encoding_type
+    port = options.port
 
     # Re-Add port for BaseHTTPServer to use since providing an encoding arg
     # overrode this functionality
-    sys.argv[1] = SERVER_PORT
+    sys.argv[1] = port
 
     if encoding_type not in ['zlib', 'deflate', 'gzip']:
         raise Exception
