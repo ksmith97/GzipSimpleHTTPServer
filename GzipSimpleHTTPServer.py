@@ -26,29 +26,23 @@ except ImportError:
     from StringIO import StringIO
 
 SERVER_PORT = 8000
+encoding_type = 'gzip'
 
-try:
+def parse_options():
+    # Option parsing logic.
     parser = OptionParser()
     parser.add_option("-e", "--encoding", dest="encoding_type",
                       help="Encoding type for server to utilize",
-                      metavar="ENCODING")
+                      metavar="ENCODING", default='gzip')
     (options, args) = parser.parse_args()
+    global encoding_type
     encoding_type = options.encoding_type
 
-    # Re-Add port for BaseHTTPServer to use since providing an encoding arg
-    # overrode this functionality
-    sys.argv[1] = SERVER_PORT
-
     if encoding_type not in ['zlib', 'deflate', 'gzip']:
-        raise Exception
-
-except:
-    sys.stderr.write(
-        "Please provide an encoding_type for the server to utilize.\n")
-    sys.stderr.write("Possible values are 'zlib', 'gzip', and 'deflate'\n")
-    sys.stderr.write("Usage: python GzipSimpleHTTPServer.py "
-                     "--encoding=<encoding_type>\n")
-    sys.exit()
+        sys.stderr.write("Please provide a valid encoding_type for the server to utilize.\n")
+        sys.stderr.write("Possible values are 'zlib', 'gzip', and 'deflate'\n")
+        sys.stderr.write("Usage: python GzipSimpleHTTPServer.py --encoding=<encoding_type>\n")
+        sys.exit()
 
 
 def zlib_encode(content):
@@ -253,6 +247,23 @@ class SimpleHTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 def test(HandlerClass = SimpleHTTPRequestHandler,
          ServerClass = BaseHTTPServer.HTTPServer):
+    """Run the HTTP request handler class.
+
+    This runs an HTTP server on port 8000 (or the first command line
+    argument).
+
+    """
+
+    parse_options()
+
+    server_address = ('127.0.0.1', SERVER_PORT)
+
+    SimpleHTTPRequestHandler.protocol_version = "HTTP/1.0"
+    httpd = BaseHTTPServer.HTTPServer(server_address, SimpleHTTPRequestHandler)
+
+    sa = httpd.socket.getsockname()
+    print "Serving HTTP on", sa[0], "port", sa[1], "..."
+    httpd.serve_forever()
     BaseHTTPServer.test(HandlerClass, ServerClass)
 
 
