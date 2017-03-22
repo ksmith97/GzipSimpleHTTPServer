@@ -2,13 +2,26 @@ GzipSimpleHTTPServer
 ====================
 Python 2.x
 
-A very simple modification of the very useful SimpleHTTPServer python script to add gzip compression.
-Since this is a very simple modification made initially for personal usage. It does not check if gzip is acceptable and just assumes it is. It only sets the minimum number of headers required for it to work(Technically it does not set headers properly
-for transferring files). It was tested primarily with chrome.
+A simple modification of the very useful SimpleHTTPServer python script originally made to add gzip compression. It now supports gzip, zlib, and deflate with gzip as the implicit default.
 
 ## Usage
 
-Just download the python script and run it from your terminal:
+### Docker
+#### Use latest from Docker Hub
+Navigate to folder you want to share files from.
+
+````
+docker run -v $PWD:/tmp/share -p 8000:8000 ksmithorn97/gzip-http-file-server
+````
+Alternativly change $PWD to the folder you want to share.
+
+#### Local Docker
+````
+docker-compose up
+````
+Automatically shares files in the share folder.
+
+### With Python 2.x
 
 ````
 python GzipSimpleHTTPServer.py
