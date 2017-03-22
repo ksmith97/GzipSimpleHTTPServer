@@ -1,0 +1,10 @@
+version: '2'
+services:
+  web:
+    build: .
+    image: ksmith97/gzip-server
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./share:/tmp/share
+
